@@ -9,67 +9,46 @@ layout: page
 <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
 
 <script>
-  // 强化路径配置（解决404问题）
-// 强制修正路径（解决拼写错误）
-  const repoName = 'mtftau-5.github.io'; // 严格匹配仓库名
-  const isOnline = window.location.host.includes('github.io');
-  const basePath = isOnline ? `/${repoName.toLowerCase()}` : '';
+  // 异步加载音乐数据
+  (async function initPlayer() {
+    try {
+      // 动态路径配置（修复GitHub Pages路径问题）
+      const repoName = 'MTFTau-5.github.io';
+      const isGitHubPages = window.location.host.includes('github.io');
+      const basePath = isGitHubPages ? `/${repoName}` : '';
 
-  // 添加容错加载逻辑
-  function loadMusic() {
-    const fallbackUrls = [
-      `${basePath}/music.json`,
-      'https://raw.githubusercontent.com/MTFTau-5/mtftau-5.github.io/main/source/music.json'
-    ];
+      // 加载音乐列表
+      const response = await fetch(`${basePath}/music.json`);
+      if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
+      
+      const musicList = await response.json();
+      if (!Array.isArray(musicList)) throw new Error('music.json格式应为数组');
 
-    for (const url of fallbackUrls) {
-      try {
-        const res = await fetch(url);
-        if (res.ok) return res.json();
-      } catch (e) {
-        console.warn(`尝试 ${url} 失败:`, e);
-      }
-    }
-    throw new Error('所有备用加载方式均失败');
-  }
-    .then(musicList => {
-      if (!Array.isArray(musicList)) {
-        throw new Error('music.json 内容必须是数组');
-      }
-
-      // 初始化播放器（带路径验证）
+      // 初始化播放器
       new APlayer({
         container: document.getElementById('music-player'),
         theme: '#F57474',
-        audio: musicList.map(file => {
-          if (!file.url) throw new Error('缺少必填字段: url');
-          
-          // 自动修复路径格式
-          const cleanUrl = file.url.startsWith('/') ? file.url : `/${file.url}`;
-          return {
-            name: file.name || '未命名',
-            artist: file.artist || '未知艺术家',
-            url: `${basePath}${cleanUrl}`.replace(/([^:]\/)\/+/g, '$1'), // 去重斜杠
-            cover: file.cover ? `${basePath}/${file.cover}`.replace('//', '/') : ''
-          };
-        })
+        audio: musicList.map(file => ({
+          name: file.name?.replace(/\.[^/.]+$/, '') || '未命名',
+          artist: file.artist || '未知艺术家',
+          url: `${basePath}${file.url.startsWith('/') ? '' : '/'}${file.url}`,
+          cover: file.cover ? `${basePath}/${file.cover}`.replace('//', '/') : ''
+        }))
       });
-    })
-    .catch(error => {
-      console.error('完整错误:', error);
+
+    } catch (error) {
+      console.error('播放器初始化失败:', error);
       document.getElementById('music-player').innerHTML = `
-        <div style="color:red; padding:1em; background:#ffeeee;">
-          <h4>⚠️ 音乐加载失败</h4>
-          <p><strong>具体错误:</strong> ${error.message}</p>
-          <hr>
-          <p><strong>请按以下步骤排查:</strong></p>
+        <div style="color: red; padding: 1em; border: 1px dashed red;">
+          <p>播放器加载失败</p>
+          <p>原因: ${error.message}</p>
+          <p>请检查: </p>
           <ol>
-            <li>访问 <a href="${basePath}/music.json" target="_blank">${basePath}/music.json</a> 确认文件存在</li>
-            <li>检查仓库中 <code>music.json</code> 是否在根目录</li>
-            <li>确保 Hexo 配置中已添加: <code>skip_render: ['music.json']</code></li>
+            <li>music.json文件是否存在？</li>
+            <li>浏览器控制台是否有其他报错？</li>
           </ol>
-          <p>按 F12 打开控制台查看网络请求详情</p>
         </div>
       `;
-    });
+    }
+  })();
 </script>
