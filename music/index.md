@@ -10,30 +10,28 @@ layout: page
 
 <script>
   // 强化路径配置（解决404问题）
-  const repoName = 'MTFTau-5.github.io'; // 必须小写
-  const isGitHubPages = window.location.host.includes('github.io');
-  const basePath = isGitHubPages ? `/${repoName.toLowerCase()}` : ''; // GitHub强制小写路径
+// 强制修正路径（解决拼写错误）
+  const repoName = 'mtftau-5.github.io'; // 严格匹配仓库名
+  const isOnline = window.location.host.includes('github.io');
+  const basePath = isOnline ? `/${repoName.toLowerCase()}` : '';
 
-  // 调试信息
-  console.log('当前路径基准:', basePath);
-  
-  fetch(`${basePath}/music.json?t=${Date.now()}`) // 添加时间戳避免缓存
-    .then(async response => {
-      console.log('HTTP状态码:', response.status);
-      
-      // 严格检查响应类型
-      if (response.status === 404) {
-        throw new Error(`music.json 文件不存在于 ${basePath}/music.json`);
-      }
-      
-      const data = await response.text();
+  // 添加容错加载逻辑
+  function loadMusic() {
+    const fallbackUrls = [
+      `${basePath}/music.json`,
+      'https://raw.githubusercontent.com/MTFTau-5/mtftau-5.github.io/main/source/music.json'
+    ];
+
+    for (const url of fallbackUrls) {
       try {
-        return JSON.parse(data); // 防止非JSON内容
+        const res = await fetch(url);
+        if (res.ok) return res.json();
       } catch (e) {
-        console.error('实际返回内容:', data.substring(0, 100));
-        throw new Error('服务器返回了非JSON数据（可能是404页面）');
+        console.warn(`尝试 ${url} 失败:`, e);
       }
-    })
+    }
+    throw new Error('所有备用加载方式均失败');
+  }
     .then(musicList => {
       if (!Array.isArray(musicList)) {
         throw new Error('music.json 内容必须是数组');
