@@ -1,13 +1,13 @@
-<!DOCTYPE html><html lang="zh-CN , en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>音乐 | MTFTau-5的小站</title><meta name="author" content="MTFTau-5"><meta name="copyright" content="MTFTau-5"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="&#x2F;&#x2F; 动态适配路径（本地开发与 GitHub Pages 兼容）   const basePath &#x3D; window.location.host.includes(&#39;github.io&#39;) ? &#39;&#x2F;MTFTau-5.github.io&#39; : &#39;&#39;;      fetch(&#96;${basePath}&#x2F;music.json&#96;)     .then(response &#x3D;">
+<!DOCTYPE html><html lang="zh-CN , en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>音乐 | MTFTau-5的小站</title><meta name="author" content="MTFTau-5"><meta name="copyright" content="MTFTau-5"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="&#x2F;&#x2F; 动态路径配置（兼容本地和GitHub Pages）   const isGitHubPages &#x3D; window.location.host.includes(&#39;github.io&#39;);   const repoName &#x3D; &#39;MTFTau-5.github.io&#39;; &#x2F;&#x2F; 你的仓库名   const basePath &#x3D; isGitHubPages ? &#96;">
 <meta property="og:type" content="website">
 <meta property="og:title" content="音乐">
 <meta property="og:url" content="http://example.com/music/index.html">
 <meta property="og:site_name" content="MTFTau-5的小站">
-<meta property="og:description" content="&#x2F;&#x2F; 动态适配路径（本地开发与 GitHub Pages 兼容）   const basePath &#x3D; window.location.host.includes(&#39;github.io&#39;) ? &#39;&#x2F;MTFTau-5.github.io&#39; : &#39;&#39;;      fetch(&#96;${basePath}&#x2F;music.json&#96;)     .then(response &#x3D;">
+<meta property="og:description" content="&#x2F;&#x2F; 动态路径配置（兼容本地和GitHub Pages）   const isGitHubPages &#x3D; window.location.host.includes(&#39;github.io&#39;);   const repoName &#x3D; &#39;MTFTau-5.github.io&#39;; &#x2F;&#x2F; 你的仓库名   const basePath &#x3D; isGitHubPages ? &#96;">
 <meta property="og:locale">
 <meta property="og:image" content="http://example.com/source/images/logo/favicon.jpg">
-<meta property="article:published_time" content="2025-05-31T11:27:51.575Z">
-<meta property="article:modified_time" content="2025-05-31T11:27:51.575Z">
+<meta property="article:published_time" content="2025-05-31T12:14:09.577Z">
+<meta property="article:modified_time" content="2025-05-31T12:14:09.577Z">
 <meta property="article:author" content="MTFTau-5">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/source/images/logo/favicon.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/music/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
@@ -149,32 +149,66 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
 <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
 <script>
-  // 动态适配路径（本地开发与 GitHub Pages 兼容）
-  const basePath = window.location.host.includes('github.io') ? '/MTFTau-5.github.io' : '';
+  // 动态路径配置（兼容本地和GitHub Pages）
+  const isGitHubPages = window.location.host.includes('github.io');
+  const repoName = 'MTFTau-5.github.io'; // 你的仓库名
+  const basePath = isGitHubPages ? `/${repoName}` : '';
+
+  // 调试信息
+  console.log('Base Path:', basePath);
   
   fetch(`${basePath}/music.json`)
     .then(response => {
-      if (!response.ok) throw new Error('音乐列表加载失败，请检查 music.json 路径');
+      console.log('Response Status:', response.status);
+      
+      // 检查返回内容类型是否为JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`返回的不是JSON (Content-Type: ${contentType})`);
+      }
       return response.json();
     })
     .then(musicList => {
-      new APlayer({
+      if (!Array.isArray(musicList)) {
+        throw new Error('music.json 格式错误：应为数组');
+      }
+
+      // 初始化播放器
+      const ap = new APlayer({
         container: document.getElementById('music-player'),
         theme: '#F57474',
         loop: 'all',
         listFolded: false,
-        audio: musicList.map(file => ({
-          name: file.name.replace(/\.[^/.]+$/, ''),
-          artist: file.artist || '未知',
-          url: `${basePath}${file.url}`,  // 动态拼接基础路径
-          cover: `${basePath}${file.cover || '/images/default-cover.jpg'}`
-        }))
+        audio: musicList.map(file => {
+          // 验证必要字段
+          if (!file.url) throw new Error('音乐条目缺少url字段');
+          
+          return {
+            name: file.name?.replace(/\.[^/.]+$/, '') || '未知曲名',
+            artist: file.artist || '未知艺术家',
+            url: `${basePath}${file.url}`,
+            cover: file.cover ? `${basePath}${file.cover}` : `${basePath}/images/default-cover.jpg`
+          };
+        })
       });
+
+      // 成功日志
+      console.log('APlayer 初始化成功', ap);
     })
     .catch(error => {
-      console.error('错误:', error);
-      document.getElementById('music-player').innerHTML = 
-        `<p style="color: red;">播放器加载失败: ${error.message}</p>`;
+      console.error('播放器加载失败:', error);
+      document.getElementById('music-player').innerHTML = `
+        <div style="color: red; padding: 20px; border: 1px dashed #f00;">
+          <p>音乐播放器加载失败</p>
+          <p>错误原因: ${error.message}</p>
+          <p>请检查：</p>
+          <ol>
+            <li>music.json 文件是否存在？</li>
+            <li>音频文件路径是否正确？</li>
+            <li>浏览器控制台是否有其他报错？</li>
+          </ol>
+        </div>
+      `;
     });
 </script>
 </div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/source/images/logo/favicon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">MTFTau-5</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/MTFTau-5"><i class="fab fa-github"></i><span>krkrdkdk，无论是谁我都很喜欢偶（户山香橙音）</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">欢迎来到 MTFTau-5的小站！这里是我的个人博客，会写一些关于个人专业，人工智能深度学习的文章，希望你们喜欢。</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/31/%E9%AB%98%E7%BB%B4%E7%A9%BA%E9%97%B4%E7%9A%84SGD%E9%80%82%E7%94%A8%E6%80%A7%E9%97%AE%E9%A2%98/" title="高维空间的SGD适用性问题">高维空间的SGD适用性问题</a><time datetime="2025-05-31T05:43:47.000Z" title="Created 2025-05-31 13:43:47">2025-05-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/31/world/" title="world'">world'</a><time datetime="2025-05-31T03:43:19.000Z" title="Created 2025-05-31 11:43:19">2025-05-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/31/hello-world/" title="Hello World">Hello World</a><time datetime="2025-05-31T03:27:52.836Z" title="Created 2025-05-31 11:27:52">2025-05-31</time></div></div></div></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>Tags</span></div><div class="card-tag-cloud"><a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" style="font-size: 1.1em; color: #999">人工智能</a></div></div><div class="card-widget card-archives">
@@ -196,7 +230,7 @@
         </li>
       
     </ul>
-  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>Website Info</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">Article Count :</div><div class="item-count">3</div></div><div class="webinfo-item"><div class="item-name">Unique Visitors :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">Page Views :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">Last Update :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-05-31T12:06:24.921Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By MTFTau-5</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>Website Info</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">Article Count :</div><div class="item-count">3</div></div><div class="webinfo-item"><div class="item-name">Unique Visitors :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">Page Views :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">Last Update :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-05-31T12:14:43.672Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By MTFTau-5</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
   const loadMathjax = () => {
     if (!window.MathJax) {
       window.MathJax = {
