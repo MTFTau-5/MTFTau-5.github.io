@@ -1,0 +1,269 @@
+<!DOCTYPE html><html lang="zh-CN , en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>源于进制转换的数据处理方法 | MTFTau-5的小站</title><meta name="author" content="MTFTau-5"><meta name="copyright" content="MTFTau-5"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="我们在训练模型的时候又是会遇到抱团的极端数据，他们的存在真是难受的要死：归一化的时候直接压在了一起，最后训练直接精度爆炸（笑啦），那我们怎么做才能避免这个麻烦呢？ 我在看苏佬的ROPE编码的时候看到了他对于进制转换的一个独到的理解：数据中可以进行进制转换让他从数值域转化为向量域，也就是利用进制转换把每一项系数拆开变成一个数组。最近我在处理金融数据的时候面对着这种抱团的极端值利用直接的simgoi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="源于进制转换的数据处理方法">
+<meta property="og:url" content="https://mtftau-5.github.io/2025/07/06/%E6%BA%90%E4%BA%8E%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="MTFTau-5的小站">
+<meta property="og:description" content="我们在训练模型的时候又是会遇到抱团的极端数据，他们的存在真是难受的要死：归一化的时候直接压在了一起，最后训练直接精度爆炸（笑啦），那我们怎么做才能避免这个麻烦呢？ 我在看苏佬的ROPE编码的时候看到了他对于进制转换的一个独到的理解：数据中可以进行进制转换让他从数值域转化为向量域，也就是利用进制转换把每一项系数拆开变成一个数组。最近我在处理金融数据的时候面对着这种抱团的极端值利用直接的simgoi">
+<meta property="og:locale">
+<meta property="og:image" content="https://mtftau-5.github.io/images/logo/favicon.jpg">
+<meta property="article:published_time" content="2025-07-06T13:53:09.000Z">
+<meta property="article:modified_time" content="2025-07-06T15:46:07.684Z">
+<meta property="article:author" content="MTFTau-5">
+<meta property="article:tag" content="人工智能">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mtftau-5.github.io/images/logo/favicon.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "源于进制转换的数据处理方法",
+  "url": "https://mtftau-5.github.io/2025/07/06/%E6%BA%90%E4%BA%8E%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95/",
+  "image": "https://mtftau-5.github.io/images/logo/favicon.jpg",
+  "datePublished": "2025-07-06T13:53:09.000Z",
+  "dateModified": "2025-07-06T15:46:07.684Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "MTFTau-5",
+      "url": "https://mtftau-5.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mtftau-5.github.io/2025/07/06/%E6%BA%90%E4%BA%8E%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '源于进制转换的数据处理方法',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F79JES1TPV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-F79JES1TPV');
+</script>
+<meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background: [object Object];"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/images/logo/favicon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/images/logo/1734363241907.jpg" alt="Logo"><span class="site-name">MTFTau-5的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">源于进制转换的数据处理方法</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">源于进制转换的数据处理方法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2025-07-06T13:53:09.000Z" title="Created 2025-07-06 21:53:09">2025-07-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2025-07-06T15:46:07.684Z" title="Updated 2025-07-06 23:46:07">2025-07-06</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>我们在训练模型的时候又是会遇到抱团的极端数据，他们的存在真是难受的要死：归一化的时候直接压在了一起，最后训练直接精度爆炸（笑啦），那我们怎么做才能避免这个麻烦呢？</p>
+<p>我在看苏佬的ROPE编码的时候看到了他对于进制转换的一个独到的理解：数据中可以进行进制转换让他从数值域转化为向量域，也就是利用进制转换把每一项系数拆开变成一个数组。最近我在处理金融数据的时候面对着这种抱团的极端值利用直接的simgoid的时候直接爆炸，利用LSTM进行计算又太吃算力我这4060ti16g根本扛不住（啥时候能有个A100品鉴），然后就发现了这个进制转换似乎保证了可微，而且还可以通过<strong>缩小进制来扩大数据之间的距离。</strong></p>
+<figure>
+<img src="image/源于进制转换的数据处理方法/1751811244369.png"
+alt="1751811244369" />
+<figcaption aria-hidden="true">1751811244369</figcaption>
+</figure>
+<p>就跟苏佬说的一样：原来训练好的模型已经学会了<strong>875</strong>&gt;<strong>874</strong>，而在16进制下同样有<strong>875</strong>&gt;<strong>874</strong>，比较规则是一模一样的（模型根本不知道你输入的是多少进制）。唯一担心的是每个维度超过9之后（10～15）模型还能不能正常比较，但事实上一般模型也有一定的泛化能力，所以每个维度稍微往外推一些是没问题的。</p>
+<p>那么这玩意怎么用数学公式表达呢？ 常见的进制转换公式 <span
+class="math display">$$
+a_m(n) = \left\lfloor \frac{n}{\beta^m} \right\rfloor \mod \beta, \quad
+m = 0,1,\ldots,d-1
+$$</span> 你完成之后就需要将他进行向量化 <span
+class="math display"><strong>v</strong><sub><em>β</em></sub>(<em>n</em>) = [ <em>a</em><sub><em>d</em> − 1</sub>(<em>n</em>), <em>a</em><sub><em>d</em> − 2</sub>(<em>n</em>), …, <em>a</em><sub>0</sub>(<em>n</em>) ] ∈ ℤ<sub><em>β</em></sub><sup><em>d</em></sup></span>
+那我们该怎么理解这个向量化呢，为什么他就真的就这么有用吗？接下来我带大家推导一下。</p>
+<p>1.那么假设 n
+的范围是0到9999，如果直接归一化，相邻整数的差距是0.0001，非常小。而如果我们用100进制（beta=100）和2维向量（d=2）表示：</p>
+<p>2.对于整数n进行<span
+class="math inline"><em>a</em><sub>0</sub> = <em>n</em>/100</span>,<span
+class="math inline"><em>a</em><sub>0</sub></span>=n mod100,向量为 [<span
+class="math inline"><em>a</em><sub>1</sub>, <em>a</em><sub>0</sub></span>]，每个分量范围0到99。</p>
+<p>3.然后将每个分量归一化：除以99得到[<span
+class="math inline"><em>a</em><sub>1</sub>/99, <em>a</em><sub>0</sub>/99</span>]</p>
+<p>4.相邻整数在大多数情况下，只有<span
+class="math inline"><em>a</em><sub>0</sub></span>变化1（高位不变）。所以归一化后<span
+class="math inline"><em>a</em><sub>0</sub></span>的差距为
+1/99≈0.0101，比整体归一化的0.0001大了100倍。</p>
+<p>看见了吗，这就是进制转换的魅力，他更加高效地做到了保留信息的同时增加数据的可读性与稳定性。</p>
+<p>当然，在beta进制分解中，​​边界条件​​定义了该方法的有效应用范围，确保数学上的合理性和计算稳定性。</p>
+<p><span
+class="math display">0 ≤ <em>n</em> &lt; <em>β</em><sup><em>d</em></sup></span>
+<span
+class="math display"><em>d</em> ≥ ⌈log<sub><em>β</em></sub>(<em>n</em><sub>max</sub> + 1)⌉</span>
+<span
+class="math display"><em>β</em> ≥ 2, <em>β</em> ∈ ℕ<sup>+</sup></span>
+<span
+class="math display"><em>n</em> = 0 ⟹ <strong>v</strong><sub><em>β</em></sub>(0) = [0, 0, …, 0]</span></p>
+<p>这个分别是<strong>输入整数范围、最小维度要求、进制基数限制和0向量单独处理</strong><br />
+让我们验证指正一下：</p>
+<p><span class="math display"><em>n</em> = 0 → [0, 0, 0]</span> <span
+class="math display"><em>n</em> = 255 → [0, 15, 15]  (十六进制
+<em>F</em><em>F</em>)</span> <span
+class="math display"><em>n</em> = 4095 → [15, 15, 15]  (最大值)</span>
+<span class="math display">$$n = 4096 \rightarrow \text{溢出，需要增加 d
+或 \beta}$$</span></p>
+<p>这样保证了算法的合理性与工程性。</p>
+<p>也就是说它可以在做到两个独特优势：<br />
+保持有效差距<br />
+相邻 n 在低位 <span class="math inline"><em>a</em><sub>0</sub></span>
+上至少差<span class="math inline">$\frac{1}{\beta-1}$</span> （如 <span
+class="math inline"><em>β</em> = 16</span> 时差 0.066）比直接归一化的
+<span class="math inline">10<sup>−6</sup></span> 大 4 个数量级
+​​进位保留突变 n=255​→[0.9375,0.9375,0.9375]而n=256→[0.0667,0.0,0.0]
+相对来说要比常规的可以保持序关系的对数缩放解释性更高，特征保存更完好；比分桶嵌入更能保持徐连关系，可解释性也更高。
+也就是说这种特征处理方式在用户行为建模、时空预测、大模型位置编码等场景中，比传统归一化或分桶方法具有显著优势，特别适合处理包含极端值的大范围整数特征。
+当然这种这只是我的数学原理推测，如果有什么想法可以联系我跟我一起探讨捏，毕竟深度学习更像是生物学，需要实证和复现。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://mtftau-5.github.io">MTFTau-5</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://mtftau-5.github.io/2025/07/06/%E6%BA%90%E4%BA%8E%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95/">https://mtftau-5.github.io/2025/07/06/%E6%BA%90%E4%BA%8E%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/">人工智能</a></div><div class="post-share"><div class="social-share" data-image="/images/logo/favicon.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/06/05/linux%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE%E9%9B%86%E5%90%88/" title="linux配置集合"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">Previous</div><div class="info-item-2">linux配置集合</div></div><div class="info-2"><div class="info-item-1">作为一个老linuxer（用deb系居多）用户了，面对linux的系统配置的时候又是依然痛不欲生，所以这里归档一下我的Linux配置设置以方便日后使用。  初始配置 更换源 首先换镜像源的是必备的，鉴于Ubuntu还有他的孩子们都有图形化，这里就不用过多赘述。面对没有镜像源图形化切换的发行版，这里给出dabian的修改示例 1sudo nano /etc/apt/sources.list #修改源文件 我用的是中科大源 12345678deb https://mirrors.ustc.edu.cn/debian/ bookworm main non-free non-free-firmware contribdeb-src https://mirrors.ustc.edu.cn/debian/ bookworm main non-free non-free-firmware contribdeb https://mirrors.ustc.edu.cn/debian-security/ bookworm-security maindeb-src...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/06/01/VAE%E7%AE%80%E8%BF%B0/" title="VAE学习笔记与感悟"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-06-01</div><div class="info-item-2">VAE学习笔记与感悟</div></div><div class="info-2"><div class="info-item-1">...</div></div></div></a><a class="pagination-related" href="/2025/05/31/%E9%AB%98%E7%BB%B4%E7%A9%BA%E9%97%B4%E7%9A%84SGD%E9%80%82%E7%94%A8%E6%80%A7%E9%97%AE%E9%A2%98/" title="高维空间的SGD适用性问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-05-31</div><div class="info-item-2">高维空间的SGD适用性问题</div></div><div class="info-2"><div class="info-item-1">在低维空间，往往SGD（随机梯度下降）会有一个尴尬的处境就是会落入局部最优解（因为它基于GD即梯度下降法），但是在高维空间会这样吗？？？  一、高维空间的优化特性：局部最优解的“消失” 在低维空间中，目标函数（如神经网络的损失函数）常存在大量尖锐的局部最优解（可以理解为在最低点之前存在一个类似于二次函数的最低点一样的存在但是他的最低点更小），SGD容易被困其中。但在高维空间（如深度学习中常见的百万级参数空间），理论和实践表明： 1. 局部最优解的结构变化 高维空间中，局部最优解的数量可能随维度呈指数增长，但绝大多数局部最优解的梯度接近零（近似平稳点），且目标函数值与全局最优解相差无几。 通俗理解可以是说梯度下降法本身的要求是目标朝着偏导数求小于零的方向前进，在二维空间存在一个偏导数，三维有两个… 以此类推n维空间将会有n-1个偏导数。你该如何保证些偏导数全部小于零？也就是说在绝对高维空间（矩阵满秩且秩足够大）的情况下，存在一个全部偏导数小于零的方向几乎不可能。  1. SGD的内在噪声机制 我们从GD公式看起： 批量梯度下降（Batch Gradient...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/logo/favicon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">MTFTau-5</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">7</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/MTFTau-5"><i class="fab fa-github"></i><span>krkrdkdk，无论是谁我都很喜欢偶（户山香橙音）</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">欢迎来到 MTFTau-5的小站！这里是我的个人博客，会写一些关于个人专业，人工智能深度学习的文章，希望你们喜欢，个人的qq为2968494219，微信为nmap_Pn欢迎联系。</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/06/%E6%BA%90%E4%BA%8E%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95/" title="源于进制转换的数据处理方法">源于进制转换的数据处理方法</a><time datetime="2025-07-06T13:53:09.000Z" title="Created 2025-07-06 21:53:09">2025-07-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/06/05/linux%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE%E9%9B%86%E5%90%88/" title="linux配置集合">linux配置集合</a><time datetime="2025-06-05T03:04:44.000Z" title="Created 2025-06-05 11:04:44">2025-06-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/06/01/VAE%E7%AE%80%E8%BF%B0/" title="VAE学习笔记与感悟">VAE学习笔记与感悟</a><time datetime="2025-06-01T03:47:03.000Z" title="Created 2025-06-01 11:47:03">2025-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/06/01/%E4%B8%AD%E5%8C%97%E4%BF%A1%E6%81%AF%E4%B8%8E%E8%AE%A1%E7%AE%97%E7%A7%91%E5%AD%A6%E5%AD%98%E6%B4%BB%E6%8C%87%E5%8C%97/" title="中北信息与计算科学存活指北">中北信息与计算科学存活指北</a><time datetime="2025-06-01T03:45:42.000Z" title="Created 2025-06-01 11:45:42">2025-06-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/05/31/%E9%AB%98%E7%BB%B4%E7%A9%BA%E9%97%B4%E7%9A%84SGD%E9%80%82%E7%94%A8%E6%80%A7%E9%97%AE%E9%A2%98/" title="高维空间的SGD适用性问题">高维空间的SGD适用性问题</a><time datetime="2025-05-31T05:43:47.000Z" title="Created 2025-05-31 13:43:47">2025-05-31</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2025 By MTFTau-5</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.5</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light and Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Settings"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/koharu.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7},"log":false});</script></body></html>
