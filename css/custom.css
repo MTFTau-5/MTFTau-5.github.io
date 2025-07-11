@@ -1,0 +1,95 @@
+:root {
+  --global-bg: url('/images/backgroung.jpg') no-repeat center center fixed !important;
+  background-size: cover !important;
+}
+body {
+  background: var(--global-bg) !important;
+  background-size: cover !important;
+  position: relative;
+  z-index: 0;
+}
+body > * {
+  position: relative;
+  z-index: 1;
+}
+/* 导航栏透明 */
+.header { /* 替换为实际类名，如 #header */
+  background: transparent !important;
+  backdrop-filter: blur(5px); /* 可选：毛玻璃效果 */
+  -webkit-backdrop-filter: blur(5px); /* 兼容 Safari */
+  position: relative;
+  z-index: 10;
+}
+.header a, .header .menu-item {
+  color: #fff !important; /* 白色文字 */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 阴影提高可读性 */
+}
+.header .menu-item:hover {
+  color: #ddd !important;
+}
+
+/* 文章框透明 */
+.post-content, .page-content { /* 替换为实际类名 */
+  background: transparent !important;
+  backdrop-filter: blur(5px); /* 可选：毛玻璃效果 */
+  -webkit-backdrop-filter: blur(5px);
+}
+.post-content p, .post-content h1, .post-content h2, .post-content a,
+.page-content p, .page-content h1, .page-content h2, .page-content a {
+  color: #fff !important;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+.post-content a:hover, .page-content a:hover {
+  color: #ddd !important;
+}
+#page-header {
+  background: transparent !important; /* 移除蓝色背景 */
+  background-color: transparent !important; /* 确保覆盖 */
+}
+.page-header.full_page {
+  background: transparent !important; /* 覆盖 full_page 样式 */
+}
+#recent-posts .recent-post-item {
+  background: transparent !important; /* 确保最近文章项透明 */
+  backdrop-filter: blur(5px); /* 可选：毛玻璃效果 */
+  -webkit-backdrop-filter: blur(5px);
+  color: #fff !important; /* 白色文字 */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 阴影提高可读性 */
+}
+cardHover, .layout > div:first-child:not(.nc) {
+  background: transparent !important; /* 确保卡片透明 */
+  backdrop-filter: blur(5px); /* 可选：毛玻璃效果 */
+  -webkit-backdrop-filter: blur(5px);
+  color: #fff !important; /* 白色文字 */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 阴影提高可读性 */
+}
+#recent-posts .recent-post-item > .recent-post-info > .article-title {
+  color: #fff !important; /* 白色文字 */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 阴影提高可读性 */
+}
+#aside-content .card-widget {
+  background: transparent !important; /* 确保侧边栏卡片透明 */
+  backdrop-filter: blur(5px); /* 可选：毛玻璃效果 */
+  -webkit-backdrop-filter: blur(5px);
+  color: #fff !important; /* 白色文字 */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 阴影提高可读性 */
+}
+#aside-content .card-info #card-info-btn {
+  background: transparent !important; /* 确保侧边栏按钮透明 */
+  color: #fff !important; /* 白色文字 */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 阴影提高可读性 */
+}
+.aplayer {
+  background: transparent !important; /* 确保音乐播放器透明 */
+  backdrop-filter: blur(5px); /* 可选：毛玻璃效果 */
+  -webkit-backdrop-filter: blur(5px);
+  color: #fff !important; /* 白色文字 */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 阴影提高可读性 */
+}
+/* 确保 body 背景不被覆盖 */
+body {
+  background: var(--global-bg) !important;
+  background-size: cover !important;
+  position: relative;
+  z-index: 0;
+}
