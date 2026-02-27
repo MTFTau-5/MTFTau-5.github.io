@@ -124,12 +124,18 @@ body {
   z-index: 0;
 }
 .aplayer {
-  height: 60px !important;
-  max-height: 60px !important;
+  /* 允许播放器高度自适应以显示歌单，移除固定 60px 限制 */
+  height: auto !important;
+  max-height: none !important;
   width: 100% !important;
   bottom: 0 !important;
   position: fixed !important;
   z-index: 9999 !important;
+}
+/* 当播放器处于固定底栏且展开歌单时，限制歌单高度并允许滚动 */
+.aplayer .aplayer-list {
+  max-height: 300px !important;
+  overflow-y: auto !important;
 }
 body {
   padding-bottom: 70px !important; /* 确保内容不被遮挡 */
