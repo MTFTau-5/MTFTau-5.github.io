@@ -123,19 +123,35 @@ body {
   position: relative;
   z-index: 0;
 }
-.aplayer {
-  /* 允许播放器高度自适应以显示歌单，移除固定 60px 限制 */
+/* 播放器放在页面内（音乐页标题下）时的样式 */
+.music-player-wrapper {
+  display: block;
+  margin: 16px auto 24px auto; /* 与上方标题保持间距 */
+  padding: 10px; /* 外围间隔，形成边框与毛玻璃之间的空隙 */
+  max-width: 980px;
+}
+.music-player-wrapper .aplayer {
+  position: relative !important; /* 不再固定底部 */
+  width: 100% !important;
   height: auto !important;
   max-height: none !important;
-  width: 100% !important;
-  bottom: 0 !important;
-  position: fixed !important;
-  z-index: 9999 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background-color: rgba(0,0,0,0.18) !important; /* 更浅的外围背景，形成“中间一层” */
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45) !important; /* 投影增加分层感 */
+  border: 1px solid rgba(255,255,255,0.03) !important;
 }
 /* 当播放器处于固定底栏且展开歌单时，限制歌单高度并允许滚动 */
-.aplayer .aplayer-list {
-  max-height: 300px !important;
+.music-player-wrapper .aplayer .aplayer-list {
+  max-height: 320px !important;
   overflow-y: auto !important;
+}
+
+/* 毛玻璃内部层，增加深色半透明覆盖创造黑色边框感觉 */
+.music-player-wrapper .aplayer .aplayer-wrap {
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  background-color: rgba(0,0,0,0.28) !important; /* 黑色半透明层 */
 }
 body {
   padding-bottom: 70px !important; /* 确保内容不被遮挡 */
