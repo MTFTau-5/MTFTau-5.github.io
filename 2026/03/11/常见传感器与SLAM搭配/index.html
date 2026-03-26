@@ -1,0 +1,300 @@
+<!DOCTYPE html><html lang="zh-CN , en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>常见传感器与SLAM搭配 | MTFTau-5的小站</title><meta name="author" content="MTFTau-5"><meta name="copyright" content="MTFTau-5"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="只有多样性才能吸收多样性。一个有效的控制系统，其自身必须具有与被控对象干扰或复杂性相匹配的多样性与灵活性。 —W. Ross Ashby理论来源于工程，理论高于工程，理论指导工程 —钱学森笔者是一个名不见经传的感知算法爱好者，对于目前很多算法的所谓部署的局限性，我在这里提出一点一面之词也是自己从高中开始学习的的感悟。或有思考，或有暴论，权当笑料公众作为茶语便后的谈资罢了。首先我们必须要知道以SLA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见传感器与SLAM搭配">
+<meta property="og:url" content="https://mtftau-5.github.io/2026/03/11/%E5%B8%B8%E8%A7%81%E4%BC%A0%E6%84%9F%E5%99%A8%E4%B8%8ESLAM%E6%90%AD%E9%85%8D/index.html">
+<meta property="og:site_name" content="MTFTau-5的小站">
+<meta property="og:description" content="只有多样性才能吸收多样性。一个有效的控制系统，其自身必须具有与被控对象干扰或复杂性相匹配的多样性与灵活性。 —W. Ross Ashby理论来源于工程，理论高于工程，理论指导工程 —钱学森笔者是一个名不见经传的感知算法爱好者，对于目前很多算法的所谓部署的局限性，我在这里提出一点一面之词也是自己从高中开始学习的的感悟。或有思考，或有暴论，权当笑料公众作为茶语便后的谈资罢了。首先我们必须要知道以SLA">
+<meta property="og:locale">
+<meta property="og:image" content="https://mtftau-5.github.io/images/logo/favicon.jpg">
+<meta property="article:published_time" content="2026-03-11T15:21:55.000Z">
+<meta property="article:modified_time" content="2026-03-26T09:19:21.923Z">
+<meta property="article:author" content="MTFTau-5">
+<meta property="article:tag" content="感知学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mtftau-5.github.io/images/logo/favicon.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "常见传感器与SLAM搭配",
+  "url": "https://mtftau-5.github.io/2026/03/11/%E5%B8%B8%E8%A7%81%E4%BC%A0%E6%84%9F%E5%99%A8%E4%B8%8ESLAM%E6%90%AD%E9%85%8D/",
+  "image": "https://mtftau-5.github.io/images/logo/favicon.jpg",
+  "datePublished": "2026-03-11T15:21:55.000Z",
+  "dateModified": "2026-03-26T09:19:21.923Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "MTFTau-5",
+      "url": "https://mtftau-5.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mtftau-5.github.io/2026/03/11/%E5%B8%B8%E8%A7%81%E4%BC%A0%E6%84%9F%E5%99%A8%E4%B8%8ESLAM%E6%90%AD%E9%85%8D/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Failed',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '常见传感器与SLAM搭配',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F79JES1TPV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-F79JES1TPV');
+</script>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+  window.addEventListener('load', preloader.endLoading)
+
+  if (false) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="web_bg" style="background: [object Object];"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/images/logo/favicon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li><li><a class="site-page child" href="/link/"><i class="fa-fw fa fa-link"></i><span> Link</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/images/logo/1734363241907.jpg" alt="Logo"><span class="site-name">MTFTau-5的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">常见传感器与SLAM搭配</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  Back to Home</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li><li><a class="site-page child" href="/link/"><i class="fa-fw fa fa-link"></i><span> Link</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">常见传感器与SLAM搭配</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2026-03-11T15:21:55.000Z" title="Created 2026-03-11 23:21:55">2026-03-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2026-03-26T09:19:21.923Z" title="Updated 2026-03-26 17:19:21">2026-03-26</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>只有多样性才能吸收多样性。一个有效的控制系统，其自身必须具有与被控对象干扰或复杂性相匹配的多样性与灵活性。 —W. Ross Ashby<br>理论来源于工程，理论高于工程，理论指导工程 —钱学森<br>笔者是一个名不见经传的感知算法爱好者，对于目前很多算法的所谓部署的局限性，我在这里提出一点一面之词也是自己从高中开始学习的的感悟。或有思考，或有暴论，权当笑料公众作为茶语便后的谈资罢了。<br>首先我们必须要知道以SLAM在内的算法是为了什么，我们都知道SLAM是为了获取一个地图与相对位置，那么我们首先需要知道SLAM算法的输入与输出。很明显SLAM的输入是各个传感器数据：无论是单目相机，深度相机，Lidar，IMU，光流检测，激光传感还是什么，他们反馈的数据都可以看作为真值加噪声，再经过映射与滤波等预处理步骤，得到一个“干净”的输入数据并送到SLAM进行加权平均，弥补各个传感器的不足。那么我在这里就可以浅浅的下个定义了：SLAM的本质就是为了对各个传感器的输出数据进行的处理并输出在当前情况最佳的相对位置。用稍微高大上的语言就是：SLAM的本质，是一个通过多传感器融合进行联合状态估计的过程，旨在实时、同步地解算移动主体在未知环境中的运动状态和该环境的空间结构。那么我们就不得不回到传感器的领域，好好看看各个传感器的作用。</p>
+<h2 id="1-常见的传感器"><a href="#1-常见的传感器" class="headerlink" title="1.常见的传感器"></a>1.常见的传感器</h2><p>我相信各位已经很熟悉单目相机，深度相机这种的了，那我们就看看别的的传感器吧。</p>
+<ol>
+<li>IMU（惯性测量单元）：他可以测量物体三轴姿态角以及加速度的装置。IMU通常包含陀螺仪、加速度计 ，有的还包含磁力计。陀螺仪用来测量三轴的角度/角速度，加速度计用来测量三轴的加速度，磁力计提供磁场朝向信息。但是它存在结构性缺陷：加速度计的任何微小零偏误差都会在二次积分后导致位置误差的发散，而陀螺仪的微小零偏误差在积分后会导致角度误差的线性发散。因此，在惯性导航中，IMU无法独立长时间工作，必须依赖外部参考进行周期性修正，这就是组合导航系统的基本原理。</li>
+<li>激光传感器：通过发射单色性强、方向性好的激光束，利用飞行时间法（TOF）或相位差法测量反射信号的时间差或相位偏移，实现毫米级精度的距离、速度与轮廓测量。具有高精度（毫米级）、高速度、抗环境光干扰强；激光的光斑更小，受距离影响较小，适合复杂环境下高精度检测（这玩意的升级版就是Lidar了）。缺陷是环境影响大，受限于物理环境限制，但是在一般场景下，激光传感器的精度还是很客观的。</li>
+<li>光流传感器（鼠标那玩意）：通过计算两个连续帧之间的光流，来判断物体运动方向与速度。光流检测算法主要分为光流法（光流法）和光流方程法（光流方程法）。光流法通过计算两个帧之间的像素位置变化，来判断物体运动方向与速度。光流方程法通过像素位置变化方程，来判断物体运动方向与速度。光流检测算法的优点是计算简单，且对环境影响小，缺点是计算效率较低，且对光流方程法来说，计算方程的精度有限。</li>
+<li>Lidar（激光雷达）：自动驾驶与机器人感知中常见的高精度传感器之一，目前的Lidar传感器已经可以达到毫米级精度，并且具有高精度、高速度、抗环境光干扰的特点。但是还是受限于物理环境限制，雨雪天气和高反射率的材质，Lidar的精度会下降，而且受限于光束的密度，他反馈回来的数据是稀疏的，数据量远不如相机拍摄的稠密矩阵，因此在生产生活中常把他和相机放在一起中，形成一个深度图做进一步处理。</li>
+<li>压力传感器：通过压力传感器，可以判断当前机器人碰撞状态，从而进行避障或者建图识别。一般来说结构简单且作用在一般的机器人的避障程序比较多，可以作为异常状态的最后底线处理方法使用。</li>
+<li>红外传感器：与激光测距类似，但是他能进行热源感应，因此可以简单判别生物或者危险热源，适合在避障中使用。</li>
+<li>编码器：编码器是一种将物理信号（如旋转角度或线性位移）转换为电信号的设备，广泛应用于自动化、机器人和数控机床等领域。他能输出角度与速度信息，可用于关节处的运动与位置控制，按照类型信号可以分为增量和绝对两个类。</li>
+<li>霍尔传感器：霍尔传感器在感知方面的核心作用是将磁学量（磁场的有无、强弱、方向、变化）转换为电信号，从而实现对物理世界的非接触式、高可靠性感知。换句话说就是利用转动或者位姿变化中磁强度等的周期性变化来输出判断位姿信息，正因如此，霍尔传感器是磁性编码器的核心组成部分之一。相对于其他同等类型编码器来说，在中低分辨率应用中，通常比同等级光学编码器成本更低。</li>
+<li>光电传感器；与霍尔类似，他是光电编码的一个核心部件，轴转动时，码盘的光栅交替透光/遮光，使光敏元件接收到明暗交替的光信号，并转换为电脉冲，以他为基础组成的编码器分辨率和精度是所有编码器类型中最高的，但是极怕污染，比磁感的环境稳定性差得多，因此一般来说工业机器人还是用霍尔传感器为主的磁感应编码器。<h2 id="2-常见的传感器算法（运动）"><a href="#2-常见的传感器算法（运动）" class="headerlink" title="2.常见的传感器算法（运动）"></a>2.常见的传感器算法（运动）</h2><h3 id="1-光流算法"><a href="#1-光流算法" class="headerlink" title="1.光流算法"></a>1.光流算法</h3>光流算法就跟我们在之前说的光流传感器的作用一样，本身这个传感器就是集成了光流算法的摄像头加后端处理单片机。对于帧间速度测算主要是分为稀疏和稠密两种，稀疏是指只计算某些像素点，稠密则计算所有像素点。在这里光流算法有两个假设</li>
+<li>目标亮度恒定不变。即同一目标在不同帧间运动时，其亮度不会发生改变。这是基本光流法的假定（所有光流法变种都必须满足），用于得到光流法基本方程。</li>
+<li>时间连续或运动是 “小运动”。即时间的变化不会引起目标位置的剧烈变化，相邻帧之间位移要比较小。同样也是光流法不可或缺的假定。<br>由于篇幅，这里只介绍稀疏光流算法。<h4 id="稀疏光流算法"><a href="#稀疏光流算法" class="headerlink" title="稀疏光流算法"></a>稀疏光流算法</h4>首先摄像头会对快速拍摄的帧进行图像预处理，包括图像裁剪，去噪，图像校正与灰度图转换（从RGB三通道转换成黑白单通道）来减少噪声和计算量。在经过一定处理之后我们把他送入光流的特征检测器中寻找角点，现在常见的特征检测器有Shi-Tomasi角点检测器，FAST 角点检测器，ORB|定向FAST和旋转BRIEF（应用较为广泛）。这里把ORB进行解释，他也是ORB-SLAM的核心部分（opencv中有他的函数cv2.ORB()），其他有兴趣的可以去自行查阅。<br>ORB 基本上是通过融合FAST关键点检测器和BRIEF描述符，并进行多项修改来增强了性能。它首先使用FAST来查找关键点，然后应用Harris角点度量来查找其中的前N点。它还使用金字塔来生成多尺度特征。首先先用FAST检测关键点：对特征点周围划定一个区域。在这像素中，有连续N个的亮度都同时高于或同时低于中心点p的亮度加上一个阈值t，则该点p被认为是角点。但是这样很明显是一个粗略的（帧间大了容易目标丢失，而且容易被噪声污染，例如突然地强光照射部分候选点），所以他们选用Harris角点响应筛选:对于每一个FAST检测出的候选点，在其周围取一个小的图像块,进行这个角点的局域梯度计算按照R值从大到小对所有候选点进行排序。在这里为了防止尺度噪声问题，他们还选择使用图像金字塔，对图像卷积后形成多尺度特征，然后对不同尺度的图像块进行角点检测。<br><img src="/images/post/采样.png" alt="采样"><br><img src="/images/post/图像金字塔.png" alt="图像金字塔"><br>概述说完就是公式.他的作用公式为：对于FAST筛选出的点在其周围取一个小的图像块，这个窗口内的所有像素计算其梯度的二阶矩，并求和形成矩阵：<br>首先fast点检测的公式为：<script type="math/tex; mode=display">m_{pq} = \sum_{(x, y) \in \text{Patch}} x^p y^q I(x, y) $$其中 $I(x, y)$ 是像素强度，坐标以关键点为中心
+然后对其计算总强度和一阶矩（并非梯度）：
+$$ m_{00} = \sum_{x, y} I(x, y), \quad
+m_{10} = \sum_{x, y} x \cdot I(x, y), \quad
+m_{01} = \sum_{x, y} y \cdot I(x, y)</script>这里$<x, y> \cdot I(x, y)$ 表示像素强度的乘积。后面两个是一阶矩。<strong>物理意义：计算整个图像块内所有像素的“质心”位置。如果图像块是完全均匀的，质心就在中心。如果图像块有亮度分布（如一个角点或边缘），质心就会偏离中心。</strong><br>关键点的主方向​ θ由图像块的质心相对于关键点的方向决定：<script type="math/tex; mode=display">C = \left( \frac{m_{10}}{m_{00}}, \frac{m_{01}}{m_{00}} \right)
+\theta = \arctan2(m_{01}, m_{10})</script>也就是从你的质心计算出来之后给你的关键点拉一个向量方向出来，然后计算这个向量的角度，这个角度就是这个关键点的主方向。<br>FAST检测完成后，就对角点进行一个筛选，这个筛选就是Harris角点响应：<script type="math/tex; mode=display">M = \sum_{\text{window}} 
+\begin{bmatrix}
+I_x^2 & I_x I_y \\
+I_x I_y & I_y^2
+\end{bmatrix} =
+\begin{bmatrix}
+\sum I_x^2 & \sum I_x I_y \\
+\sum I_x I_y & \sum I_y^2
+\end{bmatrix}</script>这个M矩阵被称为结构张量，他是为了计算点的变化率。理论上说一下推导：图像梯度​$∇I=(I_x, I_y)$是一个向量,它指向该点处亮度上升最快的方向，其大小表示在这个方向上的最大变化率。但梯度只告诉我们最优方向上的变化。如果我们想知道在任意单位方向向量,因此用方向导数给他导一下就可以得到M矩阵。<br>Harris 响应值 $R$ 为：<br>其中$\lambda_1$和$\lambda_2$是矩阵的特征值，这两个方向分别对应了变化最快和最慢的方向。<script type="math/tex; mode=display">
+R = \det(M) - k \cdot [\operatorname{trace}(M)]^2</script>其中 $\det(M) = \lambda_1 \lambda_2$，$\operatorname{trace}(M) = \lambda_1 + \lambda_2$，$k \approx 0.04\text{—}0.06$。<br>但是很明显，算特征值太慢了，所以他们很多是显式计算形式：<script type="math/tex; mode=display">
+R = \left( \sum I_x^2 \right) \left( \sum I_y^2 \right) - \left( \sum I_x I_y \right)^2 - k \left( \sum I_x^2 + \sum I_y^2 \right)^2</script>这里如果又想去的同学可能会好奇为什么两个特征值对应了图像梯度的变快最快与最慢，这里进行一个推导：<br>1.考虑图像中点 $(x_0, y_0)$ 的一个局部窗口 $\Omega$。定义图像 $I(x, y)$ 的梯度为 $\nabla I = (I_x, I_y)$，其中 $I_x = \frac{\partial I}{\partial x}, I_y = \frac{\partial I}{\partial y}$,这个是高数知识我相信你们还是可以看懂的。<br>2.入窗口函数 $w(x, y) \geq 0$（如高斯函数,其实就是高斯分布的方程），用于给窗口内不同位置赋予权重。则沿任意单位方向向量 $\mathbf{u} = (u, v)$ 的平均亮度变化强度 $E(\mathbf{u})$ 定义为：<script type="math/tex; mode=display">
+E(\mathbf{u}) = \sum_{(x,y) \in \Omega} w(x, y) \cdot [\nabla I(x, y) \cdot \mathbf{u}]^2</script>这里的权重赋值存在一个先验：靠近窗口中心的像素对计算贡献更大，远离中心的像素贡献较小。这符合”局部特征”的直觉——离中心越近，相关性越强。<br>3.定义结构张量（自相关矩阵 $M$ 为）：<script type="math/tex; mode=display">
+M = \begin{bmatrix}
+M_{00} & M_{01} \\
+M_{01} & M_{11}
+\end{bmatrix} =
+\begin{bmatrix}
+\sum_{\Omega} w I_x^2 & \sum_{\Omega} w I_x I_y \\
+\sum_{\Omega} w I_x I_y & \sum_{\Omega} w I_y^2
+\end{bmatrix}</script>于是 $E(\mathbf{u})$ 可简洁地写为二次型：<script type="math/tex; mode=display">
+E(\mathbf{u}) = \mathbf{u}^T M \mathbf{u}</script>其实这个二次型就是$E(\mathbf{u}) = \sum_{(x,y) \in \Omega} w(x, y) \cdot [\nabla I(x, y) \cdot \mathbf{u}]^2$这个式子的展开，你自己把后面部分展开就看懂了。<br>这里科普一下半正定矩阵的定义：给定一个大小为 n\times n 的实对称矩阵 A ，若对于任意长度为 n 的向量 $\boldsymbol{x} 有 \boldsymbol{x}^TA\boldsymbol{x}\geq0$ 恒成立，则矩阵 A 是一个半正定矩阵。,然后我们反过来看二次型的式子，我们会发现他就是一个半正定的矩阵。也因他是半正定的，我们可以对其特征分解：<script type="math/tex; mode=display">
+M = V \Lambda V^T = \begin{bmatrix} \mathbf{v}_1 & \mathbf{v}_2 \end{bmatrix}
+\begin{bmatrix}
+\lambda_1 & 0 \\
+0 & \lambda_2
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{v}_1^T \\
+\mathbf{v}_2^T
+\end{bmatrix}</script>其中：<br>$\mathbf{v}_1$ 和 $\mathbf{v}_2$ 是特征向量， $\lambda_1$ 和 $\lambda_2$ 是特征值。特征分解可以理解为把一个矩阵变成一个从原来的三维坐标系先变换成当前矩阵的坐标系，再经过线性的伸缩，最后再变换回原来的坐标系的方法。表现了他的变化过程。<br>任意单位方向向量 $\mathbf{u}$ 可以用特征基 ${ \mathbf{v}_1, \mathbf{v}_2 }$ 线性表示：<script type="math/tex; mode=display">
+\mathbf{u} = \alpha \mathbf{v}_1 + \beta \mathbf{v}_2</script></li>
+</ol>
+<p>由于 $\mathbf{v}_1, \mathbf{v}_2$ 是单位正交基，系数为投影：</p>
+<script type="math/tex; mode=display">
+\alpha = \mathbf{u}^T \mathbf{v}_1, \quad \beta = \mathbf{u}^T \mathbf{v}_2</script><p>且由于 $\mathbf{u}$ 是单位向量：</p>
+<script type="math/tex; mode=display">
+\alpha^2 + \beta^2 = 1</script><p>最后推导：<br>将 $\mathbf{u} = \alpha \mathbf{v}_1 + \beta \mathbf{v}_2$ 代入 $E(\mathbf{u}) = \mathbf{u}^T M \mathbf{u}$：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+E(\mathbf{u}) &= (\alpha \mathbf{v}_1^T + \beta \mathbf{v}_2^T) M (\alpha \mathbf{v}_1 + \beta \mathbf{v}_2) \\
+&= \alpha^2 \mathbf{v}_1^T M \mathbf{v}_1 + \alpha \beta \mathbf{v}_1^T M \mathbf{v}_2 + \alpha \beta \mathbf{v}_2^T M \mathbf{v}_1 + \beta^2 \mathbf{v}_2^T M \mathbf{v}_2
+\end{aligned}</script><p>利用特征向量的性质 <script type="math/tex">M\mathbf{v}_i = \lambda_i\mathbf{v}_i 和正交性 \(\mathbf{v}_i^T \mathbf{v}_j = \delta_{ij}\)</script>：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\mathbf{v}_1^T M \mathbf{v}_1 &= \mathbf{v}_1^T (\lambda_1 \mathbf{v}_1) = \lambda_1 \\
+\mathbf{v}_1^T M \mathbf{v}_2 &= \mathbf{v}_1^T (\lambda_2 \mathbf{v}_2) = 0 \\
+\mathbf{v}_2^T M \mathbf{v}_1 &= \mathbf{v}_2^T (\lambda_1 \mathbf{v}_1) = 0 \\
+\mathbf{v}_2^T M \mathbf{v}_2 &= \mathbf{v}_2^T (\lambda_2 \mathbf{v}_2) = \lambda_2
+\end{aligned}</script><p>代入上式，得到核心结论：</p>
+<script type="math/tex; mode=display">
+\boxed{E(\mathbf{u}) = \alpha^2 \lambda_1 + \beta^2 \lambda_2}</script><p>这是数学解释，按照物理的解释是：<br>由 $E(\mathbf{u}) = \alpha^2 \lambda_1 + \beta^2 \lambda_2$ 和约束条件 $\alpha^2 + \beta^2 = 1$，可以立即得出：<br>$\mathbf{u} = \mathbf{v}_1$ 时，$\alpha = 1, \beta = 0$，则</p>
+<script type="math/tex; mode=display">
+E(\mathbf{v}_1) = \lambda_1</script><p>$\lambda_1$ 是沿方向 $\mathbf{v}_1$ 的平均变化强度，并且这是所有可能方向中的最大值。<br>$\mathbf{u} = \mathbf{v}_2$ 时，$\alpha = 0, \beta = 1$，则</p>
+<script type="math/tex; mode=display">
+E(\mathbf{v}_2) = \lambda_2</script><p>$\lambda_2$ 是沿方向 $\mathbf{v}_2$ 的平均变化强度，并且这是所有可能方向中的最小值。<br>任意其他方向 $\mathbf{u}$，其变化强度 $E(\mathbf{u})$ 是 $\lambda_1$ 和 $\lambda_2$ 的加权平均，权重为 $\alpha^2$ 和 $\beta^2$，满足：</p>
+<script type="math/tex; mode=display">
+\lambda_2 \leq E(\mathbf{u}) \leq \lambda_1</script><p>Harris角点响应结束后需要对其rBRIEF 描述子生成<br>设旋转后的第 $i$ 个测试点对为 $(p_i, q_i)$，比较函数 $\tau$ 定义为：</p>
+<script type="math/tex; mode=display">
+\tau(p_i, q_i; I) =
+\begin{cases}
+1, & \text{if } I(p_i) < I(q_i) \\
+0, & \text{otherwise}
+\end{cases}</script><p>对于 $n$ 个点对（通常 $n=256$），rBRIEF 描述子是一个 $n$ 位二进制字符串：</p>
+<script type="math/tex; mode=display">
+f_n(I) = \sum_{i=1}^{n} 2^{i-1} \cdot \tau(p_i, q_i; I)</script></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="https://mtftau-5.github.io">MTFTau-5</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="https://mtftau-5.github.io/2026/03/11/%E5%B8%B8%E8%A7%81%E4%BC%A0%E6%84%9F%E5%99%A8%E4%B8%8ESLAM%E6%90%AD%E9%85%8D/">https://mtftau-5.github.io/2026/03/11/%E5%B8%B8%E8%A7%81%E4%BC%A0%E6%84%9F%E5%99%A8%E4%B8%8ESLAM%E6%90%AD%E9%85%8D/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles on this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless otherwise stated.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%84%9F%E7%9F%A5%E5%AD%A6%E4%B9%A0/">感知学习</a></div><div class="post-share"><div class="social-share" data-image="/images/logo/favicon.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/02/24/%E6%9C%89%E5%85%B3%E4%BA%8ESLAM%E6%8A%80%E6%9C%AF%E7%9A%84%E6%9D%82%E8%B0%88/" title="传统与深度学习SLAM技术杂谈"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">Next</div><div class="info-item-2">传统与深度学习SLAM技术杂谈</div></div><div class="info-2"><div class="info-item-1">这几个月在再次深度学习了SLAM技术后，感觉SLAM技术中无论是传统派还是目前的learning派，本质上都是在回答一个问题：如何在多种传感器中获取到最准确的信息，并基于这些信息进行运动和定位的估计。并在这个基础上得出一个各个传感器的关系，并基于这个关系进行运动和定位的估计。这个过程完全基于运动学，只不过传统SLAM技术是对这个传感器进行一个精确的数学建模，而learningSLAM技术则更加模糊，通过学习传感器的参数，来对传感器进行建模。但是他们无一例外都保持了一个核心：偏导与损失函数，这里我们详细讲述一下。 两代SLAM技术的藕断丝连我们都知道传统SLAM存在两种技术路线：滤波器与图优化方法。目前的传统SLAM路线中图优化已经压倒了滤波器方法，滤波器方法已经退回到IMU等导航方案发挥余热，因此我们在传统SLAM中主要介绍图优化方法。 图优化为代表的传统SLAM如图所示，这个图中每个节点都对应一个机器位姿，两个节点之间的边表示两个位姿的空间约束(相对位姿关系以及对应方差或线性矩阵)。当然边分为了两种边：回环边和帧间边。回环边会表示两个不同的node出现了相同的环境结果，正是因为...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/logo/favicon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">MTFTau-5</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/MTFTau-5"><i class="fab fa-github"></i><span>krkrdkdk，无论是谁我都很喜欢偶（户山香橙音）</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">欢迎来到 MTFTau-5的小站！这里是我的个人博客，会写一些关于个人专业，人工智能深度学习的文章，希望你们喜欢，个人的qq为2968494219，微信为nmap_Pn欢迎联系。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%B8%B8%E8%A7%81%E7%9A%84%E4%BC%A0%E6%84%9F%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">1.常见的传感器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%B8%B8%E8%A7%81%E7%9A%84%E4%BC%A0%E6%84%9F%E5%99%A8%E7%AE%97%E6%B3%95%EF%BC%88%E8%BF%90%E5%8A%A8%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">2.常见的传感器算法（运动）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%85%89%E6%B5%81%E7%AE%97%E6%B3%95"><span class="toc-number">2.1.</span> <span class="toc-text">1.光流算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A8%80%E7%96%8F%E5%85%89%E6%B5%81%E7%AE%97%E6%B3%95"><span class="toc-number">2.1.1.</span> <span class="toc-text">稀疏光流算法</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Posts</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/03/11/%E5%B8%B8%E8%A7%81%E4%BC%A0%E6%84%9F%E5%99%A8%E4%B8%8ESLAM%E6%90%AD%E9%85%8D/" title="常见传感器与SLAM搭配">常见传感器与SLAM搭配</a><time datetime="2026-03-11T15:21:55.000Z" title="Created 2026-03-11 23:21:55">2026-03-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/02/24/%E6%9C%89%E5%85%B3%E4%BA%8ESLAM%E6%8A%80%E6%9C%AF%E7%9A%84%E6%9D%82%E8%B0%88/" title="传统与深度学习SLAM技术杂谈">传统与深度学习SLAM技术杂谈</a><time datetime="2026-02-24T08:21:55.000Z" title="Created 2026-02-24 16:21:55">2026-02-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/10/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E6%96%B9%E6%B3%95%E4%BB%8B%E7%BB%8D/" title="卡尔曼滤波方法介绍">卡尔曼滤波方法介绍</a><time datetime="2025-08-10T15:21:55.000Z" title="Created 2025-08-10 23:21:55">2025-08-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/10/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/" title="人工智能深度学习入门指南">人工智能深度学习入门指南</a><time datetime="2025-07-10T11:20:26.000Z" title="Created 2025-07-10 19:20:26">2025-07-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/05/%E6%BA%90%E4%BA%8E%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95/" title="源于进制转换的数据预处理方法">源于进制转换的数据预处理方法</a><time datetime="2025-07-05T13:53:09.000Z" title="Created 2025-07-05 21:53:09">2025-07-05</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;2019 - 2026 By MTFTau-5</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Reading Mode"><i class="fas fa-book-open"></i></button><button id="hide-aside-btn" type="button" title="Toggle Between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button class="close" id="mobile-toc-button" type="button" title="Table of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back to Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'ams',
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body></html>
