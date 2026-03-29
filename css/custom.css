@@ -156,3 +156,18 @@ body {
 body {
   padding-bottom: 70px !important; /* 确保内容不被遮挡 */
 }
+
+/* 强制将“代码来源”类的外部文档链接显示为浅蓝色
+   规则：匹配 readthedocs（如 pcl.readthedocs.io）以及常见外部链接（target="_blank"）
+   如需更精确匹配，可在 markdown 中为链接手动添加 class="source-link" */
+.post-content a[href*="readthedocs.io"],
+.post-content a[href*="pcl.readthedocs.io"],
+.post-content a[target="_blank"] {
+  color: #7ecbff !important; /* 浅蓝色 */
+  text-decoration: underline !important;
+}
+
+/* 可选：为手动标注为来源的链接提供专门类名支持 */
+.post-content a.source-link {
+  color: #7ecbff !important;
+}
